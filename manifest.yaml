@@ -2,7 +2,7 @@ id: com.clipboardriver.cyime.textsync
 name: Clipboard River 文本同步
 icon: "🌊"
 description: 通过自己的 Clipboard River 服务收发纯文本；键盘显示时约每两秒应用最新收到的文本。
-version: 0.2.0
+version: 0.1.0
 type: clipboard_sync
 activation: single
 entry: main.lua

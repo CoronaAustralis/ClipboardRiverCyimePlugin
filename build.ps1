@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression
 
-$output = Join-Path (Split-Path $PSScriptRoot -Parent) 'clipboard-river-0.2.0.xipk'
+$output = Join-Path (Split-Path $PSScriptRoot -Parent) 'clipboard-river-0.1.0.xipk'
 $stream = [System.IO.File]::Open($output, [System.IO.FileMode]::Create)
 $archive = [System.IO.Compression.ZipArchive]::new($stream, [System.IO.Compression.ZipArchiveMode]::Create)
 try {

@@ -1,6 +1,6 @@
 -- Independent Clipboard River transport. Clipboard access and echo suppression belong to CyIME.
 local plugin = {}
-local APP_NAME, VERSION = "Clipboard River CyIME", "0.2.0"
+local APP_NAME, VERSION = "Clipboard River CyIME", "0.1.0"
 local active, pending, lastAppliedId
 local ready, startedAt, retryAt, retryDelay = false, 0, 0, 2
 
