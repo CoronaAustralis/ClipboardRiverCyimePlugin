@@ -1,0 +1,16 @@
+id: com.clipboardriver.cyime.textsync
+name: Clipboard River 文本同步
+icon: "🌊"
+description: 通过自己的 Clipboard River 服务收发纯文本；键盘显示时约每两秒应用最新收到的文本。
+version: 0.2.0
+type: clipboard_sync
+activation: single
+entry: main.lua
+minHostVersion: 1.15.82
+capabilities:
+  clipboard_sync:
+    protocols: [clipboard-river-v1]
+    foreground_poll_interval_ms: 2000
+network:
+  hosts: []
+  allowCustomHosts: true
