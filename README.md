@@ -4,7 +4,7 @@
 
 ## 安装和配置
 
-1. 在 CyIME 插件管理中导入xipk文件。
+1. 在 CyIME 插件管理中导入构建生成的 `build/clipboard-river-<版本>.xipk` 文件。
 2. 直接点击 **Clipboard River 文本同步** 插件卡片进入本插件设置；「去选择」会进入宿主共用的「剪贴板与同步」页，服务选择位于「备用：手动连接与其他服务」中。
 3. 填写服务端基础地址，保存设置，并在插件设置的「联网」区域允许该域名。
 4. 在 Clipboard River 管理页开启五分钟入网窗口，填写本次窗口的入网码后点击「注册设备」。窗口过期、手动关闭、重新开启或服务端重启后，旧码不可用。设备 UUID 和返回的 token 自动保存在本插件自己的配置中；入网窗口关闭不影响已注册设备连接。
@@ -24,23 +24,24 @@
 - 更换服务端后必须重新注册；不会把旧服务端的 token 发给新地址。设备被删除或凭据失效时，先在服务端检查，再在当前开放的入网窗口注册。窗口内入网码不限次数，但重新注册会使同设备旧 token 失效。
 - HTTPS 用于跨网络连接；HTTP 传输不加密，仅适合可信局域网。
 
-## 重新打包
+## 构建
+
+在本仓库 `clipboard-river` 根目录运行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\plugins\clipboard-river\build.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 ```
 
-包内只有 `manifest.yaml` 和 `main.lua`，不包含凭据、测试代码或宿主代码。
+版本号从 `manifest.yaml` 自动读取，安装包输出到本仓库的 `build/clipboard-river-<版本>.xipk`，当前版本对应 `build/clipboard-river-0.1.0.xipk`。包内只有 `manifest.yaml` 和 `main.lua`，不包含凭据、测试代码或宿主代码。
 
-本地协议检查使用与宿主一致的 LuaJ 3.0.1，见 `check.kt`。在当前项目根目录运行（需要 JDK 和 Kotlin 编译器，编译器不在 PATH 时使用其完整路径）：
+## 协议检查
+
+需要 JDK 和 Kotlin 编译器。在本仓库根目录运行：
 
 ```powershell
-$checkDir = Join-Path $env:TEMP 'clipboard-river-plugin-check'
-New-Item -ItemType Directory -Force -Path $checkDir | Out-Null
-$luaJar = Join-Path $checkDir 'luaj-jse-3.0.1.jar'
-Invoke-WebRequest 'https://repo.maven.apache.org/maven2/org/luaj/luaj-jse/3.0.1/luaj-jse-3.0.1.jar' -OutFile $luaJar
-kotlinc plugins/clipboard-river/check.kt CyIME/plugin-core/src/main/java/com/kingzcheung/xime/plugin/core/lua/sdk/SimpleJson.kt -classpath $luaJar -include-runtime -d (Join-Path $checkDir 'checks.jar')
-java -Dfile.encoding=UTF-8 -cp "$(Join-Path $checkDir 'checks.jar');$luaJar" CheckKt plugins/clipboard-river/main.lua
+powershell -NoProfile -ExecutionPolicy Bypass -File .\check.ps1
 ```
 
-已通过 13 组本地协议检查：注册字段与稳定身份、数字字符串/中文/表情/JSON 转义、简化上传回执、WebSocket hello 与本地接收确认、无关事件过滤、按到达顺序接收、重连退避、连接超时、切换服务端隔离、反向代理路径前缀、错误反馈、服务端入网失败原因和上传不盲重发。路径检查覆盖注册、profile、上传、WebSocket、尾斜杠、多级目录和同域不同路径的凭据隔离。HTTP/WS 使用模拟端点，JSON 编解码和 Lua 字符串使用真实 LuaJ 与参考宿主源码。
+编译器未加入 PATH 时，通过 `-Kotlinc` 指定 `kotlinc.bat` 的完整路径。脚本首次运行下载 LuaJ 3.0.1 和 JSON-java，缓存在 `build/deps/`；编译产物为 `build/checks.jar`，后续运行复用已下载的依赖。不需要外层目录或 CyIME 源码。
+
+构建和检查脚本都以自身所在目录定位文件，从其他工作目录调用也会将全部产物写入本仓库的 `build/`。该目录已加入 `.gitignore`。

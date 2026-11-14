@@ -1,7 +1,14 @@
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression
 
-$output = Join-Path (Split-Path $PSScriptRoot -Parent) 'clipboard-river-0.1.0.xipk'
+$manifest = Join-Path $PSScriptRoot 'manifest.yaml'
+[string]$versionLine = Get-Content -LiteralPath $manifest -Encoding UTF8 | Where-Object { $_ -match '^version:' } | Select-Object -First 1
+$version = ($versionLine -replace '^version:\s*', '').Trim().Trim('"', "'")
+if (-not $version) { throw 'manifest.yaml must declare a version.' }
+
+$buildDir = Join-Path $PSScriptRoot 'build'
+New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
+$output = Join-Path $buildDir "clipboard-river-$version.xipk"
 $stream = [System.IO.File]::Open($output, [System.IO.FileMode]::Create)
 $archive = [System.IO.Compression.ZipArchive]::new($stream, [System.IO.Compression.ZipArchiveMode]::Create)
 try {

@@ -1,5 +1,5 @@
-// Run with LuaJ 3.0.1 and CyIME's unchanged SimpleJson.kt. No Android or live credentials.
-import com.kingzcheung.xime.plugin.core.lua.sdk.SimpleJson
+// Standalone protocol checks: LuaJ 3.0.1 and JSON-java. No CyIME checkout or live credentials.
+import org.json.JSONObject
 import org.luaj.vm2.*
 import org.luaj.vm2.lib.VarArgFunction
 import org.luaj.vm2.lib.jse.JsePlatform
@@ -33,8 +33,8 @@ private fun bytes(value: LuaValue): ByteArray = value.checkstring().let {
 private fun function(body: (Varargs) -> LuaValue) = object : VarArgFunction() {
     override fun invoke(args: Varargs): Varargs = body(args)
 }
-private fun json(value: Any?) = SimpleJson.encode(value)
-private fun parse(value: String) = SimpleJson.decode(value) as Map<*, *>
+private fun json(value: Any?) = JSONObject.wrap(value).toString()
+private fun parse(value: String): Map<*, *> = JSONObject(value).toMap()
 
 private class Harness(script: File) {
     val config = mutableMapOf("serverUrl" to "https://river.example", "enrollmentCode" to "123456")
@@ -61,7 +61,7 @@ private class Harness(script: File) {
         })
         host.set("json", LuaTable().also { api ->
             api.set("encode", function { lua(json(java(it.arg1()))) })
-            api.set("decode", function { lua(SimpleJson.decode(it.arg1().checkjstring())) })
+            api.set("decode", function { lua(parse(it.arg1().checkjstring())) })
         })
         host.set("bin", LuaTable().also { api ->
             api.set("utf8", function { LuaString.valueOf(it.arg1().checkjstring().toByteArray(Charsets.UTF_8)) })
